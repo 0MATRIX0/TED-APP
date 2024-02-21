@@ -1,3 +1,4 @@
+import 'react-native-gesture-handler';
 import React, { useRef, useEffect, useState } from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -17,9 +18,14 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { FIREBASE_AUTH } from './FirebaseConfig';
 import EmailVerification from './screens/EmailVerification';
 import ForgotPassword from './screens/ForgotPassword';
+import ContentCalendar from './screens/ContentCalendar';
+import TED from './screens/TED';
+import MyBrand from './screens/MyBrand';
+import MyProfile from './screens/MyProfile';
+import Icon from "react-native-vector-icons/FontAwesome";
 
 const Stack = createStackNavigator();
-const BottomTabs = createBottomTabNavigator();
+const Tab = createBottomTabNavigator();
 
 const theme = {
   ...DefaultTheme,
@@ -27,28 +33,6 @@ const theme = {
     ...DefaultTheme.colors,
     border: 'transparent',
   },
-}
-
-function BottomTabNavigator() {
-  return (
-    <BottomTabs.Navigator screenOptions={({ route }) => ({
-      tabBarIcon: ({ focused, color, size }) => {
-        let iconName;
-        if (route.name === 'Home') {
-          iconName = focused ? 'ios-home' : 'ios-home-outline';
-        } else if (route.name === 'Account') {
-          iconName = focused ? 'ios-person' : 'ios-person-outline';
-        }
-        // You can return any component that you like here!
-        return <Ionicons name={iconName} size={size} color={color} />;
-      },
-      tabBarActiveTintColor: 'tomato',
-      tabBarInactiveTintColor: 'gray',
-    })}>
-      <BottomTabs.Screen name="Home" component={Home} />
-      <BottomTabs.Screen name="Account" component={Account} />
-    </BottomTabs.Navigator>
-  );
 }
 
 export default function App() {
@@ -81,7 +65,7 @@ export default function App() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
           user.emailVerified ?
-            (<><Stack.Screen name="App" component={Home} /></>) : (<><Stack.Screen name="EmailVerification" component={EmailVerification} /></>)
+            (<><Stack.Screen name="App" component={AppTabs} /></>) : (<><Stack.Screen name="EmailVerification" component={EmailVerification} /></>)
         ) : (
           <>
             <Stack.Screen name="Main" component={Main} />
@@ -94,5 +78,39 @@ export default function App() {
         )}
       </Stack.Navigator>
     </NavigationContainer>
+  );
+}
+
+function AppTabs() {
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+          if (route.name === 'Home') {
+            iconName = focused ? 'home' : 'home';
+          } else if (route.name === 'Content Calendar') {
+            iconName = focused ? 'calendar' : 'calendar';
+          } else if (route.name === 'TED') {
+            iconName = focused ? 'comments' : 'comments';
+          } else if (route.name === 'My Brand') {
+            iconName = focused ? 'cube' : 'cube';
+          } else if (route.name === 'My Profile') {
+            iconName = focused ? 'user' : 'user';
+          }
+
+          return <Icon name={iconName} size={size} color={color} />
+        },
+        tabBarActiveTintColor: '#4fd216',
+        tabBarInactiveTintColor: 'gray',
+      })}
+    >
+      <Tab.Screen name="Home" component={Home} />
+      <Tab.Screen name="Content Calendar" component={ContentCalendar} />
+      <Tab.Screen name="TED" component={TED} />
+      <Tab.Screen name="My Brand" component={MyBrand} />
+      <Tab.Screen name="My Profile" component={MyProfile} />
+    </Tab.Navigator>
   );
 }
