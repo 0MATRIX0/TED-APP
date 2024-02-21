@@ -2,40 +2,46 @@ import React from "react";
 import { Image, StyleSheet, StatusBar, View, Text, Pressable, Dimensions, TouchableOpacity } from "react-native";
 import { Color, FontFamily, Border, FontSize } from "../GlobalStyles";
 import img from '../assets/images/main.png';
+import GestureRecognizer from "react-native-swipe-gestures";
 
 const window = Dimensions.get("window");
 
 const OnboardingThree = ({ navigation }) => {
+    const onSwipeLeft = (gestureState) => {
+        navigation.navigate("Login");
+    };
     return (
-        <View style={styles.onboarding}>
-            <StatusBar barStyle="dark-content" />
-            <Image
-                style={styles.image}
-                source={img}
-            />
-            <View style={styles.contentContainer}>
-                <Text style={styles.heading}>
-                    People don’t take trips, trips take <Text style={styles.highlight}>people</Text>
-                </Text>
-                <Text style={styles.subtext}>
-                    To get the best of your adventure you just need to leave and go
-                    where you like. we are waiting for you
-                </Text>
-                <View style={styles.pagination}>
-                    <View style={styles.paginationDot} />
-                    <View style={[styles.paginatorItem, styles.paginatorLayout]} />
-                    <View style={styles.paginationDot} />
+        <GestureRecognizer onSwipeLeft={onSwipeLeft} style={{ flex: 1 }}>
+            <View style={styles.onboarding}>
+                <StatusBar barStyle="dark-content" />
+                <Image
+                    style={styles.image}
+                    source={img}
+                />
+                <View style={styles.contentContainer}>
+                    <Text style={styles.heading}>
+                        People don’t take trips, trips take <Text style={styles.highlight}>people</Text>
+                    </Text>
+                    <Text style={styles.subtext}>
+                        To get the best of your adventure you just need to leave and go
+                        where you like. we are waiting for you
+                    </Text>
+                    <View style={styles.pagination}>
+                        <View style={styles.paginationDot} />
+                        <View style={styles.paginationDot} />
+                        <View style={[styles.paginatorItem, styles.paginatorLayout]} />
+                    </View>
+                    <Pressable style={styles.button}>
+                        <TouchableOpacity
+                            style={styles.signupButton}
+                            onPress={() => navigation.navigate("Login")}
+                        >
+                            <Text style={styles.buttonText}>Get Started</Text>
+                        </TouchableOpacity>
+                    </Pressable>
                 </View>
-                <Pressable style={styles.button}>
-                    <TouchableOpacity
-                        style={styles.signupButton}
-                        onPress={() => navigation.replace("OnboardingThree")}
-                    >
-                        <Text style={styles.buttonText}>{`Next ->`}</Text>
-                    </TouchableOpacity>
-                </Pressable>
             </View>
-        </View>
+        </GestureRecognizer>
     );
 };
 
