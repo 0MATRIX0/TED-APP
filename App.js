@@ -23,6 +23,7 @@ import TED from './screens/TED';
 import MyBrand from './screens/MyBrand';
 import MyProfile from './screens/MyProfile';
 import Icon from "react-native-vector-icons/FontAwesome";
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -45,8 +46,6 @@ export default function App() {
     });
     return subscriber; // Don't forget to return the unsubscribe function to avoid memory leaks
   }, []);
-
-  console.log(user)
 
   const [loaded] = useFonts({
     InterBold: require('./assets/fonts/Inter-Bold.ttf'),
