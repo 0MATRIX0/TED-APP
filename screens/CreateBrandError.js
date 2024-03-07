@@ -10,7 +10,7 @@ const CreateBrandError = () => {
             <Text style={styles.subtext}>
                 Create your first brand to showcase your products or services.
             </Text>
-            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('My Brand')}>
+            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Create Brand")}>
                 <Text style={styles.buttonText}>Create Brand</Text>
             </TouchableOpacity>
         </View>
