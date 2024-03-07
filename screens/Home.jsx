@@ -18,16 +18,6 @@ const Home = ({ navigation }) => {
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false); // State to control modal visibility
-  const [newBrand, setNewBrand] = useState({
-    brandName: "",
-    tagline: "",
-    website: "",
-    industry: "",
-    platforms: "",
-    postingDays: "",
-    topics: "",
-    additionalInfo: "",
-  });
 
   useEffect(() => {
     const user = FIREBASE_AUTH.currentUser;
@@ -66,7 +56,10 @@ const Home = ({ navigation }) => {
       >
         <View style={styles.headingContainer}>
           <Text style={styles.heading}>Welcome,</Text>
-          <Text style={styles.email}>{FIREBASE_AUTH.currentUser?.email}</Text>
+          <Text style={styles.email}>
+            {FIREBASE_AUTH.currentUser.displayName ||
+              FIREBASE_AUTH.currentUser.email}
+          </Text>
         </View>
         <View style={styles.innerContainer}>
           {loading ? (
@@ -108,7 +101,7 @@ const Home = ({ navigation }) => {
             style={styles.createBrandButton}
             onPress={() => {
               setIsModalVisible(false);
-              navigation.navigate("My Brand");
+              navigation.navigate("Create Brand");
             }}
           >
             <Text style={styles.createBrandButtonText}>Create Brand</Text>
