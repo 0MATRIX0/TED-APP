@@ -24,6 +24,7 @@ import MyBrand from './screens/MyBrand';
 import MyProfile from './screens/MyProfile';
 import Icon from "react-native-vector-icons/FontAwesome";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import CreateBrandForm from './components/CreateBrandForm';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -63,8 +64,16 @@ export default function App() {
     <NavigationContainer theme={theme}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
-          user.emailVerified ?
-            (<><Stack.Screen name="App" component={AppTabs} /></>) : (<><Stack.Screen name="EmailVerification" component={EmailVerification} /></>)
+          user.emailVerified ? (
+            <>
+              <Stack.Screen name="App" component={AppTabs} />
+              <Stack.Screen name="Create Brand" component={CreateBrandForm} />
+            </>
+          ) : (
+            <>
+              <Stack.Screen name="EmailVerification" component={EmailVerification} />
+            </>
+          )
         ) : (
           <>
             <Stack.Screen name="Main" component={Main} />
