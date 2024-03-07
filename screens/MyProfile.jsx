@@ -32,7 +32,7 @@ const MyProfile = ({ navigation }) => {
 
   const deleteAccount = async () => {
     try {
-      await deleteUser(FIREBASE_AUTH);
+      await deleteUser(FIREBASE_AUTH.currentUser);
       navigation.replace("Login");
     } catch (error) {
       console.error("Error deleting user: ", error);
@@ -95,12 +95,10 @@ const ProfileItem = ({ title, iconName }) => (
 );
 
 const LogoutItem = ({ title, iconName, onPress }) => (
-  <Pressable onPress={onPress}>
-    <TouchableOpacity style={styles.item}>
-      <Icon name={iconName} size={24} style={styles.icon} />
-      <Text style={styles.itemText}>{title}</Text>
-    </TouchableOpacity>
-  </Pressable>
+  <TouchableOpacity style={styles.item} onPress={onPress}>
+    <Icon name={iconName} size={24} style={styles.icon} />
+    <Text style={styles.itemText}>{title}</Text>
+  </TouchableOpacity>
 );
 
 const styles = StyleSheet.create({
