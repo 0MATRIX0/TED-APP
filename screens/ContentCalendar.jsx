@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, ActivityIndicator } from "react-native";
 import React, { useState, useEffect } from "react";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
 import CreateBrandError from "./CreateBrandError";
@@ -33,7 +33,7 @@ const ContentCalendar = () => {
   return (
     <>
       {loading ? (
-        <Text>Loading...</Text>
+        <ActivityIndicator size="large" color="#4fd216" />
       ) : (
         <>
           {brands.length > 0 ? (
