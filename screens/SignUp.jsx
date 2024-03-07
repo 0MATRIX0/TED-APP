@@ -12,7 +12,7 @@ import {
 import { FontFamily, FontSize, Padding, Color, Border } from "../GlobalStyles";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
 const SignUp = ({ navigation }) => {
   const [email, setEmail] = React.useState("");
@@ -37,7 +37,16 @@ const SignUp = ({ navigation }) => {
           .then((userCredential) => {
             // Signed in
             var user = userCredential.user;
-            navigation.navigate("App");
+            updateProfile(user, {
+              displayName: fullName,
+            })
+              .then(() => {
+                navigation.navigate("App");
+              })
+              .catch((error) => {
+                alert("Failed to update user profile.");
+                console.log(error);
+              });
             console.log(user);
           })
           .catch((error) => {
