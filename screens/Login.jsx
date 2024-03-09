@@ -87,8 +87,9 @@ const Login = ({ navigation }) => {
         style={styles.input}
         placeholder="Email"
         keyboardType="email-address"
+        type="email"
         value={email}
-        onChangeText={(text) => setEmail(text)}
+        onChangeText={(text) => setEmail(text.toLowerCase())}
         // other props
       />
       <TextInput

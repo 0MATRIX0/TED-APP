@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
   ActivityIndicator,
-  ScrollView,
   View,
   Text,
   StyleSheet,
@@ -12,72 +11,112 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import { useFocusEffect } from "@react-navigation/native";
 
 const Home = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const [brands, setBrands] = useState([]);
+  const [unfilledBrands, setUnfilledBrands] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isModalVisible, setIsModalVisible] = useState(false); // State to control modal visibility
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
-  useEffect(() => {
+  const loadData = () => {
     const user = FIREBASE_AUTH.currentUser;
     const userId = user ? user.uid : null;
+    setLoading(true);
 
-    fetch("http://192.168.40.234:5000/api/brands/get-brands", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId: userId,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data?.brands) setBrands(data?.brands);
+    Promise.all([
+      fetch("http://192.168.40.60:4000/api/brands/get-brands", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId }),
+      }).then((response) => response.json()),
+      fetch("http://192.168.40.60:4000/api/brands/unfilled", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId }),
+      }).then((response) => response.json()),
+    ])
+      .then(([brandsData, unfilledBrandsData]) => {
+        setBrands(brandsData);
+        setUnfilledBrands(unfilledBrandsData);
         setLoading(false);
       })
       .catch((error) => {
         console.error("Error:", error);
+        setLoading(false);
       });
-  }, [FIREBASE_AUTH.currentUser]);
+  };
 
-  const renderBrandItem = ({ item }) => (
-    <View style={styles.brandItem}>
-      <Text style={styles.brandItemText}>{item.brand_name}</Text>
-    </View>
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadData();
+    }, [])
+  );
+
+  const HeaderComponent = () => (
+    <>
+      <View style={styles.headingContainer}>
+        <Text style={styles.heading}>Welcome,</Text>
+        <Text style={styles.email}>
+          {FIREBASE_AUTH.currentUser.displayName ||
+            FIREBASE_AUTH.currentUser.email}
+        </Text>
+      </View>
+      {loading && <ActivityIndicator size="large" color="#4fd216" />}
+      {!loading && brands.length === 0 && unfilledBrands.length === 0 && (
+        <Text style={styles.messageText}>
+          You don't have any brands yet. Click on the plus icon on the bottom
+          right to create your first brand.
+        </Text>
+      )}
+      {!loading && unfilledBrands.length > 0 && (
+        <Text style={styles.sectionTitle}>Complete your Brands</Text>
+      )}
+      {/* You can add more headings or sections here as needed */}
+    </>
+  );
+
+  const renderUnfilledBrandItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() =>
+        navigation.navigate("Create Brand", { brand_id: item._id })
+      }
+      activeOpacity={0.7}
+    >
+      <View style={styles.cardContent}>
+        <Text style={styles.cardTitle}>{item.brandName}</Text>
+        <View style={styles.progressBarBackground}>
+          <View
+            style={[
+              styles.progressBarFill,
+              { width: `${((item.questionIndex + 1) / 6) * 100}%` },
+            ]}
+          />
+        </View>
+      </View>
+    </TouchableOpacity>
   );
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <ScrollView
-        style={styles.scrollView}
+      <FlatList
+        data={unfilledBrands}
+        renderItem={renderUnfilledBrandItem}
+        keyExtractor={(item, index) => `unfilled-${index}`}
+        ListHeaderComponent={HeaderComponent}
+        ListFooterComponent={<View style={{ paddingBottom: insets.bottom }} />}
         contentContainerStyle={styles.contentContainer}
-      >
-        <View style={styles.headingContainer}>
-          <Text style={styles.heading}>Welcome,</Text>
-          <Text style={styles.email}>
-            {FIREBASE_AUTH.currentUser.displayName ||
-              FIREBASE_AUTH.currentUser.email}
-          </Text>
-        </View>
-        <View style={styles.innerContainer}>
-          {loading ? (
-            <ActivityIndicator size="large" color="#4fd216" />
-          ) : (
-            <>
-              {brands.length > 0 ? (
-                <Text style={styles.brandText}>Notifications Here</Text>
-              ) : (
-                <Text style={styles.messageText}>
-                  You don't have any brands yet. Click on the plus icon on the
-                  bottom right to create your first brand.
-                </Text>
-              )}
-            </>
-          )}
-        </View>
-      </ScrollView>
+      />
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => setIsModalVisible(true)}
@@ -106,14 +145,6 @@ const Home = ({ navigation }) => {
           >
             <Text style={styles.createBrandButtonText}>Create Brand</Text>
           </TouchableOpacity>
-          <FlatList
-            data={brands}
-            renderItem={renderBrandItem}
-            keyExtractor={(item, index) => index.toString()}
-            ListEmptyComponent={
-              <Text>No brands available. Start by creating one!</Text>
-            }
-          />
         </View>
       </Modal>
     </View>
@@ -154,8 +185,9 @@ const styles = StyleSheet.create({
   innerContainer: {
     flex: 1,
     justifyContent: "flex-start",
-    alignItems: "center",
+    alignItems: "stretch",
     marginTop: 20,
+    width: "100%",
   },
   brandText: {
     fontSize: 18,
@@ -213,6 +245,45 @@ const styles = StyleSheet.create({
   brandItemText: {
     fontSize: 16,
     color: "#333",
+  },
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 10,
+    padding: 16,
+    marginVertical: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    shadowOpacity: 0.1,
+    elevation: 4,
+    width: "100%", // ensures card takes full width of its parent container
+  },
+  cardContent: {},
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333",
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
+  },
+  progressBarBackground: {
+    height: 20,
+    width: "100%",
+    backgroundColor: "#e0e0e0",
+    borderRadius: 10,
+    marginTop: 10,
+    overflow: "hidden", // Ensures the inner fill does not spill over the border radius
+  },
+  progressBarFill: {
+    height: "100%",
+    backgroundColor: "#4fd216",
+    borderRadius: 10, // Maintain the same border radius for the fill
   },
 });
 

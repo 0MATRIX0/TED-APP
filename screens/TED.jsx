@@ -11,7 +11,7 @@ const TED = () => {
     const user = FIREBASE_AUTH.currentUser;
     const userId = user ? user.uid : null;
 
-    fetch("http://192.168.40.234:5000/api/brands/get-brands", {
+    fetch("http://192.168.40.60:4000/api/brands/get-brands", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -22,7 +22,7 @@ const TED = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        if (data?.brands) setBrands(data?.brands);
+        setBrands(data);
         setLoading(false);
       })
       .catch((error) => {
