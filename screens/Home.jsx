@@ -12,6 +12,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FIREBASE_AUTH } from "../FirebaseConfig";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useFocusEffect } from "@react-navigation/native";
+import { Swipeable } from "react-native-gesture-handler";
+import { Animated } from "react-native";
 
 const Home = ({ navigation }) => {
   const insets = useSafeAreaInsets();
@@ -62,6 +64,27 @@ const Home = ({ navigation }) => {
     }, [])
   );
 
+  const handleDelete = (brandId) => {
+    fetch(`http://192.168.40.60:4000/api/brands/delete-unfilled/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId: FIREBASE_AUTH.currentUser.uid, brandId }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Success:", data);
+        // Remove the brand from the state to update the UI
+        setUnfilledBrands((prevBrands) =>
+          prevBrands.filter((brand) => brand._id !== brandId)
+        );
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
+
   const HeaderComponent = () => (
     <>
       <View style={styles.headingContainer}>
@@ -85,27 +108,74 @@ const Home = ({ navigation }) => {
     </>
   );
 
-  const renderUnfilledBrandItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() =>
-        navigation.navigate("Create Brand", { brand_id: item._id })
-      }
-      activeOpacity={0.7}
-    >
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{item.brandName}</Text>
-        <View style={styles.progressBarBackground}>
-          <View
-            style={[
-              styles.progressBarFill,
-              { width: `${((item.questionIndex + 1) / 6) * 100}%` },
-            ]}
-          />
-        </View>
+  const renderRightActions = (progress, dragX, item) => {
+    const trans = dragX.interpolate({
+      inputRange: [-100, 0],
+      outputRange: [0, 100],
+      extrapolate: "clamp",
+    });
+
+    const onPress = () => {
+      handleDelete(item._id); // handle the deletion
+    };
+
+    return (
+      <View
+        style={{
+          width: 100,
+          flexDirection: "row",
+          justifyContent: "flex-end",
+          paddingVertical: 10,
+        }}
+      >
+        <Animated.View style={{ flex: 1, transform: [{ translateX: trans }] }}>
+          <TouchableOpacity
+            onPress={onPress}
+            style={{
+              width: 100,
+              height: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "red",
+              borderRadius: 5,
+            }}
+          >
+            <Icon name="delete" size={24} color="#fff" />
+          </TouchableOpacity>
+        </Animated.View>
       </View>
-    </TouchableOpacity>
-  );
+    );
+  };
+
+  const renderUnfilledBrandItem = ({ item }) => {
+    return (
+      <Swipeable
+        renderRightActions={(progress, dragX) =>
+          renderRightActions(progress, dragX, item)
+        }
+      >
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() =>
+            navigation.navigate("Create Brand", { brand_id: item._id })
+          }
+          activeOpacity={0.7}
+        >
+          <View style={styles.cardContent}>
+            <Text style={styles.cardTitle}>{item.brandName}</Text>
+            <View style={styles.progressBarBackground}>
+              <View
+                style={[
+                  styles.progressBarFill,
+                  { width: `${((item.questionIndex + 1) / 6) * 100}%` },
+                ]}
+              />
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Swipeable>
+    );
+  };
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>

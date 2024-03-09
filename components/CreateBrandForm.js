@@ -24,8 +24,6 @@ const CreateBrandForm = () => {
     const [keyTopics, setKeyTopics] = useState('');
     const [customKnowledge, setCustomKnowledge] = useState('');
 
-
-
     useEffect(() => {
         if (brand_id) {
             fetch(`http://192.168.40.60:4000/api/brands/unfilled-data/`, {
@@ -40,17 +38,35 @@ const CreateBrandForm = () => {
             })
                 .then((response) => response.json())
                 .then((data) => {
-                    console.log(data)
                     setBrandName(data.brandName);
                     setBrandTagline(data.brandTagline);
                     setBrandLink(data.brandLink);
                     setIndustry(data.industry);
                     setKeyTopics(data.keyTopics);
                     setCustomKnowledge(data.customKnowledge);
-                    setCurrentQuestionIndex(`${data.questionIndex + 1}`);
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
+                    setCurrentQuestionIndex(data.questionIndex + 1);
+                    console.log('index from server:', data.questionIndex)
+                    let newMessages = [];
+                    questions.forEach((question, index) => {
+                        if (index <= currentQuestionIndex) {
+                            let answer = '';
+                            switch (index) {
+                                case 0: answer = brandName; break;
+                                case 1: answer = brandTagline; break;
+                                case 2: answer = brandLink; break;
+                                case 3: answer = industry; break;
+                                case 4: answer = keyTopics; break;
+                                case 5: answer = customKnowledge; break;
+                            }
+                            if (answer) {
+                                newMessages.push({ from: 'bot', text: question.question });
+                                newMessages.push({ from: 'user', text: answer });
+                            }
+                        }
+                    });
+                    console.log('New Messages:', newMessages)
+                    newMessages = [...newMessages]
+                    setMessages(newMessages);
                 });
         }
     }, [brandId, brand_id, currentQuestionIndex]);
@@ -73,24 +89,32 @@ const CreateBrandForm = () => {
             "questionIndex": currentQuestionIndex,
         };
 
+        console.log("This is the current", currentQuestionIndex)
+        console.log
         switch (currentQuestionIndex) {
             case 0:
                 payload.brandName = inputValue;
+                setBrandName(inputValue);
                 break;
             case 1:
                 payload.brandTagline = inputValue;
+                setBrandTagline(inputValue);
                 break;
             case 2:
                 payload.brandLink = inputValue;
+                setBrandLink(inputValue);
                 break;
             case 3:
                 payload.industry = inputValue;
+                setIndustry(inputValue);
                 break;
             case 4:
                 payload.keyTopics = inputValue;
+                setKeyTopics(inputValue);
                 break;
             case 5:
                 payload.customKnowledge = inputValue;
+                setCustomKnowledge(inputValue);
                 break;
             default:
                 break;
@@ -108,7 +132,6 @@ const CreateBrandForm = () => {
 
             if (response.ok) {
                 const json = await response.json();
-                console.log(json);
                 setBrandId(json._id)
 
                 let newMessages = [
@@ -124,9 +147,11 @@ const CreateBrandForm = () => {
                     scrollViewRef.current?.scrollToEnd({ animated: true });
                 }, 100);
 
-                if (currentQuestionIndex < questions.length - 1) {
+                if ((!brandName && currentQuestionIndex < questions.length - 1) || (brandName && currentQuestionIndex < questions.length)) {
                     const index = parseInt(currentQuestionIndex) + 1;
                     console.log('Index:', index);
+                    console.log('Length:', questions.length);
+                    console.log('brndName:', brandName);
                     setCurrentQuestionIndex(index);
                 } else {
                     // All questions answered
@@ -141,10 +166,12 @@ const CreateBrandForm = () => {
 
     const handleSkip = () => {
         console.log("Skip was clicked");
-        // Perform any action here, for example, navigate to another screen
-        // navigation.navigate("NextScreen");
-        // If you want to process the skipping as answering the question, you can move to the next question or end the questionnaire
+        navigation.replace('Brand Animation', { brandId: brandId })
     };
+
+    if (parseInt(currentQuestionIndex) === questions?.length) {
+        navigation.replace('Brand Animation', { brandId: brandId });
+    }
 
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>

@@ -25,6 +25,7 @@ import MyProfile from './screens/MyProfile';
 import Icon from "react-native-vector-icons/FontAwesome";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import CreateBrandForm from './components/CreateBrandForm';
+import BrandAnimation from './components/BrandAnimation';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -68,6 +69,7 @@ export default function App() {
             <>
               <Stack.Screen name="App" component={AppTabs} />
               <Stack.Screen name="Create Brand" component={CreateBrandForm} />
+              <Stack.Screen name="Brand Animation" component={BrandAnimation} />
             </>
           ) : (
             <>
