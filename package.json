@@ -29,7 +29,7 @@
     "expo-status-bar": "~1.11.1",
     "expo-system-ui": "~2.9.3",
     "firebase": "^10.8.0",
-    "lottie-react-native": "^6.6.0",
+    "lottie-react-native": "^6.7.0",
     "react": "18.2.0",
     "react-freeze": "^1.0.3",
     "react-native": "0.73.4",
